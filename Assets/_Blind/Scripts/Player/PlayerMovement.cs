@@ -11,8 +11,8 @@ namespace Blind
         [Tooltip("Movement speed in metres per second")]
         [SerializeField] float moveSpeed = 5f;
 
-        [Tooltip("How quickly the robot rotates to face movement direction (degrees/sec)")]
-        [SerializeField] float rotationSpeed = 360f;
+        [Tooltip("How smoothly the robot eases into the movement direction (lower = lazier turn)")]
+        [SerializeField] float rotationSmoothing = 6f;
 
         Rigidbody rb;
         Camera mainCamera;
@@ -45,8 +45,8 @@ namespace Blind
                 Vector3 moveDir    = (camForward * moveInput.y + camRight * moveInput.x).normalized;
 
                 Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-                transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(
+                    transform.rotation, targetRotation, rotationSmoothing * Time.deltaTime);
             }
         }
 

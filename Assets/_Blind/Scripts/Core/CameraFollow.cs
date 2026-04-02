@@ -12,8 +12,8 @@ namespace Blind
         [Tooltip("How quickly the camera position catches up to the player")]
         [SerializeField] float smoothSpeed = 8f;
 
-        [Tooltip("How quickly the camera rotates to match the player (lower = less spinning)")]
-        [SerializeField] float rotationSmoothSpeed = 2f;
+        [Tooltip("How quickly the camera rotates to match the player (lower = lazier follow)")]
+        [SerializeField] float rotationSmoothSpeed = 3f;
 
         [Tooltip("Offset from the player in local space (set Y to control height)")]
         [SerializeField] Vector3 offset = new Vector3(0f, 8f, -9f);
