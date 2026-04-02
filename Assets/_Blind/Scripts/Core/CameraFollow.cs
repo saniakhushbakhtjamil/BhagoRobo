@@ -13,7 +13,7 @@ namespace Blind
         [SerializeField] float smoothSpeed = 8f;
 
         [Tooltip("Offset from the player in local space (set Y to control height)")]
-        [SerializeField] Vector3 offset = new Vector3(0f, 10f, -6f);
+        [SerializeField] Vector3 offset = new Vector3(0f, 8f, -9f);
 
         void LateUpdate()
         {

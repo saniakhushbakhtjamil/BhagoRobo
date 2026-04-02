@@ -151,8 +151,8 @@ namespace Blind
             cam.backgroundColor = Color.black;
 
             // Position: above and behind the player
-            camGO.transform.position = new Vector3(0f, 10f, -6f);
-            camGO.transform.rotation = Quaternion.Euler(55f, 0f, 0f); // ~55° pitch, adjust by feel
+            camGO.transform.position = new Vector3(0f, 8f, -9f);
+            camGO.transform.rotation = Quaternion.Euler(42f, 0f, 0f); // ~42° pitch — see ahead of robot
 
             var follow = camGO.AddComponent<CameraFollow>();
             var so = new SerializedObject(follow);
