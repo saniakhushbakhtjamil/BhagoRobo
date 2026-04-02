@@ -3,61 +3,78 @@ using UnityEngine.InputSystem;
 
 namespace Blind
 {
-    // W = forward (robot rotates to face direction)
-    // S = reverse (no rotation — wheels don't spin 180)
-    // A/D = strafe left/right without rotating
-    // Camera follows robot facing direction (handled by CameraFollow)
+    // Wheeled vehicle physics:
+    // - W/S: accelerate/reverse with momentum
+    // - A/D: turn, scaled by speed (can't spin in place)
+    // - No strafing — lateral friction prevents sideways sliding
+    // - Natural deceleration via Rigidbody drag
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerMovement : MonoBehaviour
     {
-        [Tooltip("Movement speed in metres per second")]
-        [SerializeField] float moveSpeed = 5f;
+        [Tooltip("Force applied when pressing W/S")]
+        [SerializeField] float accelerationForce = 18f;
 
-        [Tooltip("How smoothly the robot eases into a new forward direction (lower = lazier turn)")]
-        [SerializeField] float rotationSmoothing = 6f;
+        [Tooltip("Maximum forward/reverse speed (m/s)")]
+        [SerializeField] float maxSpeed = 7f;
+
+        [Tooltip("How fast the robot turns (degrees/sec at full speed)")]
+        [SerializeField] float turnSpeed = 90f;
+
+        [Tooltip("How strongly sideways sliding is cancelled (wheel friction)")]
+        [SerializeField] float lateralFriction = 12f;
+
+        [Tooltip("Drag applied when no input — controls how quickly it coasts to a stop")]
+        [SerializeField] float drivingDrag = 1.5f;
+
+        [Tooltip("Extra drag when braking (S pressed while moving forward)")]
+        [SerializeField] float brakingDrag = 4f;
 
         Rigidbody rb;
-        Vector2 moveInput;
+        float forwardInput;
+        float turnInput;
 
         void Awake()
         {
             rb = GetComponent<Rigidbody>();
-
             rb.constraints = RigidbodyConstraints.FreezeRotationX
                            | RigidbodyConstraints.FreezeRotationZ
                            | RigidbodyConstraints.FreezePositionY;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.drag = drivingDrag;
         }
 
         void Update()
         {
             if (!GameManager.Instance.IsPlaying()) return;
 
-            moveInput = new Vector2(
-                Keyboard.current.dKey.ReadValue() - Keyboard.current.aKey.ReadValue(),
-                Keyboard.current.wKey.ReadValue() - Keyboard.current.sKey.ReadValue()
-            );
-
-            // Only rotate when moving forward — S reverses without turning
-            float forwardInput = Keyboard.current.wKey.ReadValue();
-            if (forwardInput > 0.01f && moveInput.sqrMagnitude > 0.01f)
-            {
-                // Rotate toward the W+A/D direction in robot-local space
-                Vector3 moveDir = (transform.right * moveInput.x + transform.forward).normalized;
-
-                Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation, targetRotation, rotationSmoothing * Time.deltaTime);
-            }
+            forwardInput = Keyboard.current.wKey.ReadValue() - Keyboard.current.sKey.ReadValue();
+            turnInput    = Keyboard.current.dKey.ReadValue() - Keyboard.current.aKey.ReadValue();
         }
 
         void FixedUpdate()
         {
             if (!GameManager.Instance.IsPlaying()) return;
 
-            // W/S move along robot's current forward (S = reverse, no rotation change)
-            // A/D strafe along robot's right
-            Vector3 move = transform.forward * moveInput.y + transform.right * moveInput.x;
-            rb.MovePosition(rb.position + move * moveSpeed * Time.fixedDeltaTime);
+            float currentSpeed = Vector3.Dot(rb.linearVelocity, transform.forward);
+
+            // ── Acceleration ──────────────────────────────────────────────────
+            if (Mathf.Abs(currentSpeed) < maxSpeed)
+                rb.AddForce(transform.forward * forwardInput * accelerationForce, ForceMode.Acceleration);
+
+            // ── Drag: heavier when braking ────────────────────────────────────
+            bool braking = forwardInput < 0f && currentSpeed > 0f
+                        || forwardInput > 0f && currentSpeed < 0f;
+            rb.drag = braking ? brakingDrag : drivingDrag;
+
+            // ── Turning — scaled by speed so you can't spin in place ──────────
+            float speedFraction = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
+            float turnDirection = Mathf.Sign(currentSpeed); // reverses turn direction when reversing
+            float yaw = turnInput * turnSpeed * speedFraction * turnDirection * Time.fixedDeltaTime;
+            transform.Rotate(0f, yaw, 0f, Space.World);
+
+            // ── Lateral friction — kills sideways sliding ─────────────────────
+            Vector3 lateralVel = Vector3.Dot(rb.linearVelocity, transform.right) * transform.right;
+            rb.AddForce(-lateralVel * lateralFriction, ForceMode.Acceleration);
         }
     }
 }
