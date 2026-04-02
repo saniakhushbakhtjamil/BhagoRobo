@@ -48,9 +48,9 @@ namespace Blind
 
         static void SetupLighting()
         {
-            // Very dark ambient — the flashlight should be the main light source
-            RenderSettings.ambientLight = new Color(0.03f, 0.03f, 0.05f);
-            RenderSettings.ambientIntensity = 0.05f;
+            // Flat ambient — dark but not pitch black so walls are barely visible
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.06f, 0.06f, 0.08f);
 
             // Dim the default directional light (or create one if missing)
             var dirLight = GameObject.Find("Directional Light");
@@ -62,6 +62,22 @@ namespace Blind
             }
             dirLight.GetComponent<Light>().intensity = 0.05f;
             dirLight.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+
+            // Ensure URP renders spot/point lights per-pixel (otherwise they won't show)
+            var urpAsset = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline
+                as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+            if (urpAsset != null)
+            {
+                urpAsset.additionalLightsRenderingMode =
+                    UnityEngine.Rendering.Universal.LightRenderingMode.PerPixel;
+                urpAsset.maxAdditionalLightsCount = 8;
+                EditorUtility.SetDirty(urpAsset);
+                Debug.Log("[SceneSetup] URP additional lights set to Per Pixel.");
+            }
+            else
+            {
+                Debug.LogWarning("[SceneSetup] Could not find URP asset — lights may not render.");
+            }
         }
 
         static GameObject CreateRoom()
@@ -118,7 +134,7 @@ namespace Blind
             var flashlightGO = new GameObject("Flashlight");
             flashlightGO.transform.parent = player.transform;
             flashlightGO.transform.localPosition = new Vector3(0f, 0.5f, 0.3f);
-            flashlightGO.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            flashlightGO.transform.localRotation = Quaternion.Euler(20f, 0f, 0f); // tilt down to hit floor
 
             var spotLight = flashlightGO.AddComponent<Light>();
             spotLight.type = LightType.Spot;
