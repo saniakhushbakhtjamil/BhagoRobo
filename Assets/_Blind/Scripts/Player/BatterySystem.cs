@@ -18,8 +18,16 @@ namespace Blind
         float graceTimer;
         bool inGracePeriod;
 
+        void Start()
+        {
+            if (config == null)
+                Debug.LogError("[BatterySystem] BatteryConfig not assigned! " +
+                    "Select the Player in the Hierarchy and drag Assets/_Blind/Data/BatteryConfig into the Config field.");
+        }
+
         void Update()
         {
+            if (config == null) return;
             if (!GameManager.Instance.IsPlaying()) return;
 
             if (!inGracePeriod)

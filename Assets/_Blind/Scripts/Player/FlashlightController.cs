@@ -30,6 +30,18 @@ namespace Blind
             batterySystem.OnGracePeriodStarted += HandleGracePeriod;
         }
 
+        void Start()
+        {
+            // Set light to full brightness immediately — don't wait for first battery event
+            if (spotLight == null)
+            {
+                Debug.LogError("[FlashlightController] Spotlight not assigned! " +
+                    "Select the Player in the Hierarchy and drag the Flashlight's Light component into the Spot Light field.");
+                return;
+            }
+            HandleBatteryChanged(1f);
+        }
+
         void OnDisable()
         {
             batterySystem.OnBatteryChanged -= HandleBatteryChanged;
