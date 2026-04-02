@@ -7,11 +7,8 @@ namespace Blind
     // This means the flashlight can sweep the full front hemisphere but never point behind.
     public class FlashlightAimer : MonoBehaviour
     {
-        [Tooltip("The flashlight transform to rotate (child of player)")]
-        [SerializeField] Transform flashlight;
-
-        [Tooltip("Downward tilt angle so the beam hits the floor ahead")]
-        [SerializeField] float downwardTilt = 20f;
+        [Tooltip("The turret transform (small cube on top) that spins with the mouse")]
+        [SerializeField] Transform turret;
 
         Camera mainCamera;
 
@@ -23,10 +20,10 @@ namespace Blind
         void Update()
         {
             if (!GameManager.Instance.IsPlaying()) return;
-            AimFlashlight();
+            AimTurret();
         }
 
-        void AimFlashlight()
+        void AimTurret()
         {
             Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
             Plane floor = new Plane(Vector3.up, Vector3.zero);
@@ -41,15 +38,12 @@ namespace Blind
 
             toMouse.Normalize();
 
-            // Clamp to ±90° of robot's forward — flashlight can't point behind
+            // Clamp to ±90° of robot body forward — turret can't face behind
             float angle = Vector3.SignedAngle(transform.forward, toMouse, Vector3.up);
             angle = Mathf.Clamp(angle, -90f, 90f);
 
-            Vector3 clampedDir = Quaternion.Euler(0f, angle, 0f) * transform.forward;
-
-            // Apply horizontal aim + downward tilt
-            flashlight.rotation = Quaternion.LookRotation(clampedDir)
-                                * Quaternion.Euler(downwardTilt, 0f, 0f);
+            // Rotate turret on Y axis only in local space
+            turret.localRotation = Quaternion.Euler(0f, angle, 0f);
         }
     }
 }

@@ -163,14 +163,23 @@ namespace Blind
             SetColor(rightWheel, new Color(0.2f, 0.2f, 0.2f));
             Object.DestroyImmediate(rightWheel.GetComponent<Collider>());
 
+            // Turret — smaller cube on top that spins with the mouse
+            var turretGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            turretGO.name = "Turret";
+            turretGO.transform.parent        = player.transform;
+            turretGO.transform.localPosition = new Vector3(0f, 0.55f, 0f);
+            turretGO.transform.localScale    = new Vector3(0.4f, 0.3f, 0.55f);
+            SetColor(turretGO, new Color(0.6f, 0.7f, 1f)); // slightly darker blue
+            Object.DestroyImmediate(turretGO.GetComponent<Collider>());
+
             // Scripts
             player.AddComponent<PlayerMovement>();
             var battery = player.AddComponent<BatterySystem>();
 
-            // Flashlight — mounted at front-top of body
+            // Flashlight — child of turret so it spins with it
             var flashlightGO = new GameObject("Flashlight");
-            flashlightGO.transform.parent = player.transform;
-            flashlightGO.transform.localPosition = new Vector3(0f, 0.5f, 0.5f);
+            flashlightGO.transform.parent = turretGO.transform;
+            flashlightGO.transform.localPosition = new Vector3(0f, 0.1f, 0.35f);
             flashlightGO.transform.localRotation = Quaternion.Euler(20f, 0f, 0f); // tilt down to hit floor
 
             var spotLight = flashlightGO.AddComponent<Light>();
@@ -191,7 +200,7 @@ namespace Blind
             so.ApplyModifiedProperties();
 
             var aimer = new SerializedObject(flashAimer);
-            aimer.FindProperty("flashlight").objectReferenceValue = flashlightGO.transform;
+            aimer.FindProperty("turret").objectReferenceValue = turretGO.transform;
             aimer.ApplyModifiedProperties();
 
             var battSO = new SerializedObject(battery);
