@@ -37,8 +37,9 @@ namespace Blind
 
         static void ClearScene()
         {
-            // Remove everything except the default directional light if present
-            foreach (var go in Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None))
+            // Destroy root objects only — Unity auto-destroys children with the parent
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            foreach (var go in scene.GetRootGameObjects())
             {
                 if (go.name == "Directional Light") continue;
                 Object.DestroyImmediate(go);
