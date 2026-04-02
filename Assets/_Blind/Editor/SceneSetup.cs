@@ -63,14 +63,17 @@ namespace Blind
             dirLight.GetComponent<Light>().intensity = 0.05f;
             dirLight.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-            // Ensure URP renders spot/point lights per-pixel (otherwise they won't show)
+            // Ensure URP renders spot/point lights per-pixel via SerializedObject
             var urpAsset = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline
                 as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
             if (urpAsset != null)
             {
-                urpAsset.additionalLightsRenderingMode =
-                    UnityEngine.Rendering.Universal.LightRenderingMode.PerPixel;
-                urpAsset.maxAdditionalLightsCount = 8;
+                var so = new SerializedObject(urpAsset);
+                var modeProp = so.FindProperty("m_AdditionalLightsRenderingMode");
+                if (modeProp != null) modeProp.intValue = 1; // 1 = PerPixel
+                var limitProp = so.FindProperty("m_AdditionalLightsPerObjectLimit");
+                if (limitProp != null) limitProp.intValue = 8;
+                so.ApplyModifiedProperties();
                 EditorUtility.SetDirty(urpAsset);
                 Debug.Log("[SceneSetup] URP additional lights set to Per Pixel.");
             }
