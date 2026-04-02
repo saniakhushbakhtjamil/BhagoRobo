@@ -115,12 +115,15 @@ namespace Blind
 
         static GameObject CreatePlayer(BatteryConfig config)
         {
-            // Body
-            var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            player.name = "Player";
+            // Root — empty GameObject owns physics + scripts
+            var player = new GameObject("Player");
             player.tag = "Player";
-            player.transform.position = new Vector3(0f, 1f, 0f);
-            SetColor(player, new Color(0.8f, 0.85f, 1f)); // pale blue robot
+            player.transform.position = new Vector3(0f, 0.3f, 0f);
+
+            // Physics collider sized to the robot body
+            var col = player.AddComponent<BoxCollider>();
+            col.center = new Vector3(0f, 0.2f, 0f);
+            col.size   = new Vector3(0.7f, 0.5f, 1f);
 
             // Rigidbody — physics-driven movement, no tipping
             var rb = player.AddComponent<Rigidbody>();
@@ -129,14 +132,45 @@ namespace Blind
                            | RigidbodyConstraints.FreezePositionY;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
 
+            // --- Visuals ---
+
+            // Box body
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            body.name = "Body";
+            body.transform.parent = player.transform;
+            body.transform.localPosition = new Vector3(0f, 0.25f, 0f);
+            body.transform.localScale    = new Vector3(0.65f, 0.4f, 0.9f);
+            SetColor(body, new Color(0.75f, 0.82f, 1f)); // pale blue
+            Object.DestroyImmediate(body.GetComponent<Collider>());
+
+            // Left tyre
+            var leftWheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            leftWheel.name = "Tyre_L";
+            leftWheel.transform.parent        = player.transform;
+            leftWheel.transform.localPosition = new Vector3(-0.42f, 0.15f, 0f);
+            leftWheel.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            leftWheel.transform.localScale    = new Vector3(0.3f, 0.1f, 0.3f);
+            SetColor(leftWheel, new Color(0.2f, 0.2f, 0.2f)); // dark rubber
+            Object.DestroyImmediate(leftWheel.GetComponent<Collider>());
+
+            // Right tyre
+            var rightWheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            rightWheel.name = "Tyre_R";
+            rightWheel.transform.parent        = player.transform;
+            rightWheel.transform.localPosition = new Vector3(0.42f, 0.15f, 0f);
+            rightWheel.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            rightWheel.transform.localScale    = new Vector3(0.3f, 0.1f, 0.3f);
+            SetColor(rightWheel, new Color(0.2f, 0.2f, 0.2f));
+            Object.DestroyImmediate(rightWheel.GetComponent<Collider>());
+
             // Scripts
             player.AddComponent<PlayerMovement>();
             var battery = player.AddComponent<BatterySystem>();
 
-            // Flashlight — child of player, at head height, pointing forward
+            // Flashlight — mounted at front-top of body
             var flashlightGO = new GameObject("Flashlight");
             flashlightGO.transform.parent = player.transform;
-            flashlightGO.transform.localPosition = new Vector3(0f, 0.5f, 0.3f);
+            flashlightGO.transform.localPosition = new Vector3(0f, 0.5f, 0.5f);
             flashlightGO.transform.localRotation = Quaternion.Euler(20f, 0f, 0f); // tilt down to hit floor
 
             var spotLight = flashlightGO.AddComponent<Light>();
