@@ -26,6 +26,12 @@ namespace Blind
             State = GameState.GracePeriod;
         }
 
+        public void TriggerPlaying()
+        {
+            if (State != GameState.GracePeriod) return;
+            State = GameState.Playing;
+        }
+
         public void TriggerGameOver()
         {
             if (State == GameState.GameOver || State == GameState.Win) return;

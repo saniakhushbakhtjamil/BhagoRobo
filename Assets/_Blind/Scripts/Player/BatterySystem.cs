@@ -55,9 +55,15 @@ namespace Blind
         // Called by BatteryPickup
         public void Recharge(float amount)
         {
-            if (inGracePeriod) return; // pickup can't save you in grace period
             BatteryPercent = Mathf.Clamp01(BatteryPercent + amount);
             OnBatteryChanged?.Invoke(BatteryPercent);
+
+            // If we're in grace period and battery is restored, exit grace period
+            if (inGracePeriod && BatteryPercent > 0f)
+            {
+                inGracePeriod = false;
+                GameManager.Instance.TriggerPlaying();
+            }
         }
     }
 }
