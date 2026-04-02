@@ -147,6 +147,7 @@ namespace Blind
             spotLight.color = new Color(1f, 0.97f, 0.9f);
 
             var flashCtrl = player.AddComponent<FlashlightController>();
+            var flashAimer = player.AddComponent<FlashlightAimer>();
 
             // Wire up serialized fields via SerializedObject
             var so = new SerializedObject(flashCtrl);
@@ -154,6 +155,10 @@ namespace Blind
             so.FindProperty("batterySystem").objectReferenceValue = battery;
             if (config != null) so.FindProperty("config").objectReferenceValue = config;
             so.ApplyModifiedProperties();
+
+            var aimer = new SerializedObject(flashAimer);
+            aimer.FindProperty("flashlight").objectReferenceValue = flashlightGO.transform;
+            aimer.ApplyModifiedProperties();
 
             var battSO = new SerializedObject(battery);
             if (config != null) battSO.FindProperty("config").objectReferenceValue = config;
