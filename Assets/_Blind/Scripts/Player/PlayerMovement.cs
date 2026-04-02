@@ -3,25 +3,25 @@ using UnityEngine.InputSystem;
 
 namespace Blind
 {
-    // WASD moves and rotates the robot. Camera follows the robot's facing direction.
-    // Mouse controls only the flashlight (handled by FlashlightAimer).
+    // W = forward (robot rotates to face direction)
+    // S = reverse (no rotation — wheels don't spin 180)
+    // A/D = strafe left/right without rotating
+    // Camera follows robot facing direction (handled by CameraFollow)
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerMovement : MonoBehaviour
     {
         [Tooltip("Movement speed in metres per second")]
         [SerializeField] float moveSpeed = 5f;
 
-        [Tooltip("How smoothly the robot eases into the movement direction (lower = lazier turn)")]
+        [Tooltip("How smoothly the robot eases into a new forward direction (lower = lazier turn)")]
         [SerializeField] float rotationSmoothing = 6f;
 
         Rigidbody rb;
-        Camera mainCamera;
         Vector2 moveInput;
 
         void Awake()
         {
             rb = GetComponent<Rigidbody>();
-            mainCamera = Camera.main;
 
             rb.constraints = RigidbodyConstraints.FreezeRotationX
                            | RigidbodyConstraints.FreezeRotationZ
@@ -37,12 +37,12 @@ namespace Blind
                 Keyboard.current.wKey.ReadValue() - Keyboard.current.sKey.ReadValue()
             );
 
-            // Rotate robot body toward movement direction (camera-relative)
-            if (moveInput.sqrMagnitude > 0.01f)
+            // Only rotate when moving forward — S reverses without turning
+            float forwardInput = Keyboard.current.wKey.ReadValue();
+            if (forwardInput > 0.01f && moveInput.sqrMagnitude > 0.01f)
             {
-                Vector3 camForward = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
-                Vector3 camRight   = Vector3.ProjectOnPlane(mainCamera.transform.right,   Vector3.up).normalized;
-                Vector3 moveDir    = (camForward * moveInput.y + camRight * moveInput.x).normalized;
+                // Rotate toward the W+A/D direction in robot-local space
+                Vector3 moveDir = (transform.right * moveInput.x + transform.forward).normalized;
 
                 Quaternion targetRotation = Quaternion.LookRotation(moveDir);
                 transform.rotation = Quaternion.Slerp(
@@ -54,10 +54,9 @@ namespace Blind
         {
             if (!GameManager.Instance.IsPlaying()) return;
 
-            // Move in camera-relative direction
-            Vector3 camForward = Vector3.ProjectOnPlane(mainCamera.transform.forward, Vector3.up).normalized;
-            Vector3 camRight   = Vector3.ProjectOnPlane(mainCamera.transform.right,   Vector3.up).normalized;
-            Vector3 move       = (camForward * moveInput.y + camRight * moveInput.x);
+            // W/S move along robot's current forward (S = reverse, no rotation change)
+            // A/D strafe along robot's right
+            Vector3 move = transform.forward * moveInput.y + transform.right * moveInput.x;
             rb.MovePosition(rb.position + move * moveSpeed * Time.fixedDeltaTime);
         }
     }
