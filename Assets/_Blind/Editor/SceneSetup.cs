@@ -282,14 +282,15 @@ namespace Blind
                 new Vector2(200f, 20f), new Vector2(-120f, -30f), new Color(0.1f, 0.1f, 0.1f, 0.8f),
                 TextAnchor.UpperRight);
 
-            // Battery bar fill
+            // Battery bar fill — pivot at left edge so it shrinks right-to-left
             var barFill = CreateUIPanel(barBG.transform, "BatteryBarFill",
                 new Vector2(200f, 20f), Vector2.zero, Color.green,
                 TextAnchor.UpperLeft);
-            var fillImage = barFill.GetComponent<Image>();
-            fillImage.type = Image.Type.Filled;
-            fillImage.fillMethod = Image.FillMethod.Horizontal;
-            fillImage.fillAmount = 1f;
+            var fillRect = barFill.GetComponent<RectTransform>();
+            fillRect.pivot = new Vector2(0f, 0.5f);
+            fillRect.anchorMin = new Vector2(0f, 0f);
+            fillRect.anchorMax = new Vector2(0f, 1f);
+            fillRect.anchoredPosition = Vector2.zero;
 
             // Game Over panel
             var gameOverPanel = CreateUIPanel(canvasGO.transform, "GameOverPanel",
