@@ -279,12 +279,12 @@ namespace Blind
 
             // Battery bar background
             var barBG = CreateUIPanel(canvasGO.transform, "BatteryBarBG",
-                new Vector2(200f, 20f), new Vector2(-120f, -30f), new Color(0.1f, 0.1f, 0.1f, 0.8f),
+                new Vector2(120f, 14f), new Vector2(-80f, -25f), new Color(0.1f, 0.1f, 0.1f, 0.8f),
                 TextAnchor.UpperRight);
 
             // Battery bar fill — pivot at left edge so it shrinks right-to-left
             var barFill = CreateUIPanel(barBG.transform, "BatteryBarFill",
-                new Vector2(200f, 20f), Vector2.zero, Color.green,
+                new Vector2(120f, 14f), Vector2.zero, Color.green,
                 TextAnchor.UpperLeft);
             var fillRect = barFill.GetComponent<RectTransform>();
             fillRect.pivot = new Vector2(0f, 0.5f);
