@@ -19,7 +19,7 @@ namespace Blind
         [SerializeField] float rotationSmoothSpeed = 3f;
 
         [Tooltip("Offset from the player in local space (set Y to control height)")]
-        [SerializeField] Vector3 offset = new Vector3(0f, 8f, -9f);
+        [SerializeField] Vector3 offset = new Vector3(0f, 5f, -5f);
 
         [Tooltip("Seconds the robot must hold a direction before the camera starts rotating")]
         [SerializeField] float rotationDelay = 0.4f;
