@@ -26,19 +26,24 @@ namespace Blind
         void OnEnable()
         {
             batterySystem.OnBatteryChanged += UpdateBar;
-            GameManager.Instance.OnGameOver += ShowGameOver;
-            GameManager.Instance.OnWin += ShowWin;
         }
 
         void OnDisable()
         {
             batterySystem.OnBatteryChanged -= UpdateBar;
-            GameManager.Instance.OnGameOver -= ShowGameOver;
-            GameManager.Instance.OnWin -= ShowWin;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnGameOver -= ShowGameOver;
+                GameManager.Instance.OnWin -= ShowWin;
+            }
         }
 
         void Start()
         {
+            // GameManager.Instance is guaranteed to exist by Start (after all Awake calls)
+            GameManager.Instance.OnGameOver += ShowGameOver;
+            GameManager.Instance.OnWin += ShowWin;
+
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
             if (winPanel != null) winPanel.SetActive(false);
         }
