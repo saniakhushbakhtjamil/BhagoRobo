@@ -8,8 +8,8 @@ namespace Blind
     {
         [SerializeField] BatterySystem batterySystem;
 
-        [Tooltip("The UI Image used as the battery bar fill (Image Type: Filled)")]
-        [SerializeField] Image batteryBar;
+        [Tooltip("The RectTransform of the battery bar fill panel")]
+        [SerializeField] RectTransform batteryBarFill;
 
         [Tooltip("Color at 100% battery")]
         [SerializeField] Color fullColor = Color.green;
@@ -22,6 +22,8 @@ namespace Blind
 
         [Tooltip("Win panel to show when the player reaches the exit")]
         [SerializeField] GameObject winPanel;
+
+        float maxBarWidth;
 
         void OnEnable()
         {
@@ -46,13 +48,19 @@ namespace Blind
 
             if (gameOverPanel != null) gameOverPanel.SetActive(false);
             if (winPanel != null) winPanel.SetActive(false);
+
+            // Store the full width so we can scale it down as battery drains
+            if (batteryBarFill != null)
+                maxBarWidth = batteryBarFill.sizeDelta.x;
         }
 
         void UpdateBar(float percent)
         {
-            if (batteryBar == null) return;
-            batteryBar.fillAmount = percent;
-            batteryBar.color = Color.Lerp(emptyColor, fullColor, percent);
+            if (batteryBarFill == null) return;
+            var size = batteryBarFill.sizeDelta;
+            size.x = maxBarWidth * percent;
+            batteryBarFill.sizeDelta = size;
+            batteryBarFill.GetComponent<Image>().color = Color.Lerp(emptyColor, fullColor, percent);
         }
 
         void ShowGameOver()

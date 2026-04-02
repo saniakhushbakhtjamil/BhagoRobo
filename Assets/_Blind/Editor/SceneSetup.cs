@@ -314,7 +314,7 @@ namespace Blind
             var battery = player.GetComponent<BatterySystem>();
             var hudSO = new SerializedObject(hud);
             hudSO.FindProperty("batterySystem").objectReferenceValue = battery;
-            hudSO.FindProperty("batteryBar").objectReferenceValue = fillImage;
+            hudSO.FindProperty("batteryBarFill").objectReferenceValue = barFill.GetComponent<RectTransform>();
             hudSO.FindProperty("gameOverPanel").objectReferenceValue = gameOverPanel;
             hudSO.FindProperty("winPanel").objectReferenceValue = winPanel;
             hudSO.ApplyModifiedProperties();
