@@ -64,17 +64,18 @@ Assets/
 ```
 
 ## Scripts Reference
-All scripts from the 2D project carry over unchanged into 3D (they use physics-agnostic patterns).
+All scripts written. Robot uses wheeled physics + mouse-aimed turret flashlight.
 
 | Script | Location | Purpose |
 |---|---|---|
 | `GameManager.cs` | `Core/` | Owns game state: Playing → GracePeriod → GameOver / Win |
-| `CameraFollow.cs` | `Core/` | Smoothly follows the Player, preserves camera Z position |
+| `CameraFollow.cs` | `Core/` | Follows + rotates with player; offset (0,5,-5), pitch 45° |
 | `BatteryConfig.cs` | `Data/` | ScriptableObject — tunable values (drain rate, grace period, pickup amount) |
-| `PlayerMovement.cs` | `Player/` | Top-down movement in all directions (WASD / arrow keys) |
+| `PlayerMovement.cs` | `Player/` | Wheeled physics: momentum, turning radius, lateral friction, braking drag |
 | `BatterySystem.cs` | `Player/` | Battery % drain, grace period timer, fires events |
-| `FlashlightController.cs` | `Player/` | Subscribes to battery events, updates Light2D radius + intensity |
-| `BatteryPickup.cs` | `Pickups/` | Recharges battery when player collides with it |
+| `FlashlightController.cs` | `Player/` | Subscribes to battery events, updates light radius + intensity |
+| `FlashlightAimer.cs` | `Player/` | Rotates turret toward mouse cursor, clamped ±90° front hemisphere |
+| `BatteryPickup.cs` | `Pickups/` | Recharges battery on collision; works during grace period |
 | `ExitTrigger.cs` | `Environment/` | Triggers win when player reaches the exit |
 | `HUDController.cs` | `UI/` | Subscribes to battery events, updates battery bar color and fill |
 
@@ -114,23 +115,37 @@ Key differences from the 2D project when setting up the scene in 3D URP:
 - **Enemies (post-MVP)**: "Moromogons" — drain battery on contact, don't kill directly
 - **Battery spawns**: Random each run
 
+## Robot Visual (built from primitives in-scene)
+- Box body + two cylinder wheels + small cube turret on top
+- Flashlight (Spot Light) mounted on turret — rotates with mouse
+
 ## Current Session Progress
 - [x] Unity 3D URP project created at `My project/`
 - [x] `_Blind/` folder structure created in Assets
-- [x] `BatteryConfig.cs` written to `Scripts/Data/`
-- [ ] **Next: Create `BatteryConfig` asset** — right-click `_Blind/Data` → Create → Blind → Battery Config → name it `BatteryConfig`
-- [ ] Then: write remaining scripts (GameManager, PlayerMovement, BatterySystem, FlashlightController, BatteryPickup, ExitTrigger, HUDController, CameraFollow)
-- [ ] Then: set up scene (room, robot, flashlight, camera, UI)
+- [x] All scripts written (see Scripts Reference)
+- [x] Scene rough setup — robot, flashlight, camera, battery pickups placed
+- [x] Wheeled vehicle physics (momentum, turn radius, lateral friction, braking)
+- [x] Mouse-aimed flashlight turret (independent of move direction, ±90° clamp)
+- [x] Battery system working — pickups work in grace period, restore to Playing
+- [x] Camera follows + rotates with robot (offset 0,5,-5; pitch 45°)
+- [ ] **Uncommitted changes** — `PlayerMovement.cs` + `SampleScene.unity` modified, `FlashlightAimer.cs.meta` untracked. Commit when happy with feel.
+- [ ] **Next: Tune feel in Play Mode** — adjust speed, turn radius, flashlight radius/intensity vs battery, grace period flicker. Then commit.
+- [ ] Game Over & Win screens (UI canvas)
+- [ ] Proper room layout — walls, floor, exit trigger with proximity reveal (~5-7m)
+- [ ] Create reusable prefabs (battery pickup, exit, robot)
+- [ ] Juice: camera shake, particle effects, SFX, music
+- [ ] Level design (multiple rooms)
+- [ ] Enemies (Moromogons — drain battery on contact)
 
 ## Development Phases
 - [x] Game design finalised (MVP scope locked)
 - [x] 3D URP Unity project created
 - [x] Folder structure set up
-- [x] BatteryConfig.cs created
-- [ ] **Current: Write remaining scripts**
-- [ ] Set up scene in 3D (room, lighting, player, camera)
-- [ ] Game Over & Win screens
-- [ ] Create reusable prefabs
-- [ ] Juice: camera shake, particle effects, sound effects, background music
-- [ ] Level design (multiple levels)
-- [ ] Enemies (Moromogons)
+- [x] All scripts written
+- [x] Scene rough setup (robot, flashlight, camera, battery pickups)
+- [ ] **Current: Tune game feel → commit scene → UI screens**
+- [ ] Proper room layout with walls and exit
+- [ ] Prefabs for pickups and environment
+- [ ] Juice pass (shake, particles, audio)
+- [ ] Level design
+- [ ] Enemies

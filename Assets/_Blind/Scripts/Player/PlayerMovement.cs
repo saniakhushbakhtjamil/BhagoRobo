@@ -15,10 +15,10 @@ namespace Blind
         [SerializeField] float accelerationForce = 18f;
 
         [Tooltip("Maximum forward/reverse speed (m/s)")]
-        [SerializeField] float maxSpeed = 7f;
+        [SerializeField] float maxSpeed = 5f;
 
         [Tooltip("How fast the robot turns (degrees/sec at full speed)")]
-        [SerializeField] float turnSpeed = 90f;
+        [SerializeField] float turnSpeed = 50f;
 
         [Tooltip("How strongly sideways sliding is cancelled (wheel friction)")]
         [SerializeField] float lateralFriction = 12f;
@@ -40,7 +40,7 @@ namespace Blind
                            | RigidbodyConstraints.FreezeRotationZ
                            | RigidbodyConstraints.FreezePositionY;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
-            rb.drag = drivingDrag;
+            rb.linearDamping = drivingDrag;
         }
 
         void Update()
@@ -64,7 +64,7 @@ namespace Blind
             // ── Drag: heavier when braking ────────────────────────────────────
             bool braking = forwardInput < 0f && currentSpeed > 0f
                         || forwardInput > 0f && currentSpeed < 0f;
-            rb.drag = braking ? brakingDrag : drivingDrag;
+            rb.linearDamping = braking ? brakingDrag : drivingDrag;
 
             // ── Turning — scaled by speed so you can't spin in place ──────────
             float speedFraction = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxSpeed);
